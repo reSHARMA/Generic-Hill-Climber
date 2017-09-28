@@ -49,18 +49,26 @@ pair<int,int> init_individual(int min,int max){
 }
 
 void print_population(){
+	cout<<"[";
+	int i = 0;
+	int last = population.size();
 	for(auto p:population){
-		cout<<"{"<<p.first<<","<<p.second<<"} ";
+		cout<<"{\"x\":"<<p.first<<",\"y\":"<<p.second<<"}";
+		i++;
+		if(i != last){
+			cout<<",";
+		}
 	}
+	cout<<"]";
 	cout<<endl;
 }
 
 int mean_height(){
-	cout<<"					finding mean height"<<endl;
+	//cout<<"					finding mean height"<<endl;
 	int sum = 0;
 	int i=0;
 	for(auto p:population){
-		cout<<"						working on individual "<<i+1<<endl;
+		//cout<<"						working on individual "<<i+1<<endl;
 		int x = p.first;
 		int y = p.second;
 		int z = (D - (B*pow(y,b)+A*pow(x,a)))/C; //z^c 
@@ -70,28 +78,28 @@ int mean_height(){
 		i++;
 		sum += z;
 	}
-	cout<<"								sum "<<sum<<endl;
+	//cout<<"								sum "<<sum<<endl;
 	return sum/i;
 }
 
 void find_diversity(){
-	cout<<"				finding diversity"<<endl;
+	//cout<<"				finding diversity"<<endl;
 	int av_height = mean_height();
-	cout<<"					mean height calculated "<<av_height<<endl;
-	cout<<"					meta_height size "<<meta_height.size()<<endl;
+	//cout<<"					mean height calculated "<<av_height<<endl;
+	//cout<<"					meta_height size "<<meta_height.size()<<endl;
 	for(auto m:meta_height){
 		//m.first.second = abs(av_height - m.first.first);
 		meta_diversity.push_back({abs(av_height - m.first),m.second});
 	}
-	cout<<"					meta_diversity size "<<meta_diversity.size()<<endl;
+	//cout<<"					meta_diversity size "<<meta_diversity.size()<<endl;
 }
 
 int find_best(){
-	cout<<"			finding best"<<endl;
+	//cout<<"			finding best"<<endl;
 	find_diversity();
 	sort(meta_height.rbegin(),meta_height.rend());
 	int fs = ceil((double)meta_height.size()*fsh);
-	cout<<"				fs "<<fs<<endl;
+	//cout<<"				fs "<<fs<<endl;
 	/*
 	 * to-do
 	 * avoid the below swap
@@ -105,12 +113,12 @@ int find_best(){
 	}
 	sort(meta_diversity.rbegin(),meta_diversity.rbegin()+fs);
 	fs = fs * fsd;
-	cout<<"				fs "<<fs<<endl;
+	//cout<<"				fs "<<fs<<endl;
 	return fs;
 }
 
 void cross_over(){
-	cout<<"		Cross-over"<<endl;
+	//cout<<"		Cross-over"<<endl;
 	int fs = find_best();
 	for(int i=0;i<fs*4;i++){
 		int father = -1;
@@ -124,9 +132,9 @@ void cross_over(){
 }
 
 void mutate(){
-	cout<<"		Mutation begins"<<endl;
+	//cout<<"		Mutation begins"<<endl;
 	int size = offsprings.size();
-	cout<<"		size of offsprings"<<offsprings.size()<<endl;
+	//cout<<"		size of offsprings"<<offsprings.size()<<endl;
 	for(int i=0;i<size;i++){
 		int individual = rand()%size;
 		int chance = rand()%2;
@@ -151,7 +159,7 @@ int evolve(){
 
 int main(){
 	fast;
-	cout<<"enter the equation for the mesh"<<endl;
+	//cout<<"enter the equation for the mesh"<<endl;
 	//Ax^a+By^b+Cz^c=D
 	cin>>A>>B>>C>>D>>a>>b>>c;
 	for(int i=0;i<ip;i++){
@@ -159,7 +167,7 @@ int main(){
 	}
 	for(;;){
 		int temp = evolve();
-		cout<<"temp "<<temp<<"  progress  "<<progress<<endl;
+		//cout<<"temp "<<temp<<"  progress  "<<progress<<endl;
 		progress += temp;
 		if(progress > target){
 			break;
