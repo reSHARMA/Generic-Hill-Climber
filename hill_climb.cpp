@@ -12,15 +12,17 @@ const int inf=0x3F3F3F3F;
  * fit threshold height fsh
  * fir threshold diversity fsd
  * mutation rate mt
+ * retain factor rt
  * target 
  */
 const int ip = 10;
 const int MAX = 10000;
 const int rp = 2;
-const double fsh = .7;
-const double fsd = .6;
+const double fsh = .6;
+const double fsd = .5;
 const double mt = .2;
-const int target = 500;
+const double rt = .2;
+const int target = 15000;
 int A,B,C,D,a,b,c;
 
 int progress = 0;
@@ -43,8 +45,15 @@ vector <pair <int,int> > meta_diversity;
 vector <pair <int,int> > offsprings;
 
 pair<int,int> init_individual(int min,int max){
-	int x = rand()%max+min;
-	int y = rand()%max+min;
+	random_device rd;  //Will be used to obtain a seed for the random number engine
+	mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	uniform_int_distribution<> dis(min,max);
+	/*
+	int x = min + (rand()%(max+min+1));
+	int y = min + (rand()%(max+min+1));
+	*/
+	int x = dis(gen);
+	int y = dis(gen);
 	return {x,y};
 }
 
@@ -53,14 +62,13 @@ void print_population(){
 	int i = 0;
 	int last = population.size();
 	for(auto p:population){
-		cout<<"{\"x\":"<<p.first<<",\"y\":"<<p.second<<"}";
+		cout<<"["<<p.first<<","<<p.second<<"]";
 		i++;
 		if(i != last){
 			cout<<",";
 		}
 	}
 	cout<<"]";
-	cout<<endl;
 }
 
 int mean_height(){
@@ -111,21 +119,32 @@ int find_best(){
 		meta_diversity[i] = meta_diversity[meta_height[i].second];
 		meta_diversity[meta_height[i].second] = temp;
 	}
-	sort(meta_diversity.rbegin(),meta_diversity.rbegin()+fs);
-	fs = fs * fsd;
+	sort(meta_diversity.begin(),meta_diversity.begin()+fs);
+	//fs = fs * fsd;
 	//cout<<"				fs "<<fs<<endl;
 	return fs;
 }
 
 void cross_over(){
 	//cout<<"		Cross-over"<<endl;
+	for(int i=0;i<meta_height.size()*rt;i++){
+		offsprings.push_back(meta_height[i]);
+	}
 	int fs = find_best();
-	for(int i=0;i<fs*4;i++){
+	for(int i=fs-1;i>=0;i-=2){
+		offsprings.push_back({population[i].first,population[i+1].second});
+		offsprings.push_back({population[i].second,population[i+1].first});
+	}
+	fs = fs * fsd;
+	for(int i=0;i<fs*(rp-1);i++){
 		int father = -1;
 		int mother = -1;
+		random_device rd;  //Will be used to obtain a seed for the random number engine
+		mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+		uniform_int_distribution<> dis(0,fs);
 		while(father == mother){
-			father = rand()%fs;
-			mother = rand()%fs;
+			father = dis(gen);
+			mother = dis(gen);
 		}
 	offsprings.push_back({population[father].first,population[mother].second});
 	}
@@ -135,13 +154,17 @@ void mutate(){
 	//cout<<"		Mutation begins"<<endl;
 	int size = offsprings.size();
 	//cout<<"		size of offsprings"<<offsprings.size()<<endl;
-	for(int i=0;i<size;i++){
+	for(int i=0;i<size*mt;i++){
 		int individual = rand()%size;
 		int chance = rand()%2;
+		random_device rd;  //Will be used to obtain a seed for the random number engine
+		mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+		uniform_int_distribution<> dis(-10000,MAX);
+
 		if(chance == 0)
-			offsprings[individual].first = rand()%MAX;
+			offsprings[individual].first = dis(gen);
 		else 
-			offsprings[individual].second = rand()%MAX;
+			offsprings[individual].second = dis(gen);
 	}
 }
 
@@ -163,14 +186,18 @@ int main(){
 	//Ax^a+By^b+Cz^c=D
 	cin>>A>>B>>C>>D>>a>>b>>c;
 	for(int i=0;i<ip;i++){
-		population.push_back(init_individual(0,MAX));
+		population.push_back(init_individual(-10000,MAX));
 	}
+	cout<<"[";
 	for(;;){
 		int temp = evolve();
 		//cout<<"temp "<<temp<<"  progress  "<<progress<<endl;
 		progress += temp;
 		if(progress > target){
+			cout<<"]";
 			break;
+		} else {
+			cout<<",";
 		}
 	}
 	return 0;
