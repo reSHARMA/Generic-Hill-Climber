@@ -17,5 +17,8 @@ Changing the selection process
 **With fsh .6 (60%) fsd .4 (40%) and ip 4 , the generation becomes extinct after first generation.**
 With fsh .8 and fsd .6 , the population increases in a favourable fashion.
 
+***
+Testing phase could be seen [here](https://github.com/reSHARMA/Generic-Hill-Climber/wiki)
+
 
 
