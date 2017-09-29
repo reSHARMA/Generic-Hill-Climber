@@ -17,12 +17,13 @@ const int inf=0x3F3F3F3F;
  */
 const int ip = 10;
 const int MAX = 10000;
+const int MIN = -10000;
 const int rp = 2;
 const double fsh = .6;
-const double fsd = .5;
+const double fsd = .8;
 const double mt = .2;
 const double rt = .2;
-const int target = 15000;
+const int target = 1500;
 int A,B,C,D,a,b,c;
 
 int progress = 0;
@@ -106,6 +107,9 @@ int find_best(){
 	//cout<<"			finding best"<<endl;
 	find_diversity();
 	sort(meta_height.rbegin(),meta_height.rend());
+	for(int i=0;i<ceil((double)meta_height.size()*rt);i++){
+		offsprings.push_back(population[i]);
+	}
 	int fs = ceil((double)meta_height.size()*fsh);
 	//cout<<"				fs "<<fs<<endl;
 	/*
@@ -127,16 +131,14 @@ int find_best(){
 
 void cross_over(){
 	//cout<<"		Cross-over"<<endl;
-	for(int i=0;i<meta_height.size()*rt;i++){
-		offsprings.push_back(meta_height[i]);
-	}
 	int fs = find_best();
-	for(int i=fs-1;i>=0;i-=2){
+	for(int i=0;i<fs && i+2<population.size();i+=2){
 		offsprings.push_back({population[i].first,population[i+1].second});
+		//cout<<population[i].first<<" "<<population[i+1].second<<endl;;
 		offsprings.push_back({population[i].second,population[i+1].first});
 	}
-	fs = fs * fsd;
-	for(int i=0;i<fs*(rp-1);i++){
+	fs = ceil(fs * fsd);
+	for(int i=0;i<ceil(fs*rp);i++){
 		int father = -1;
 		int mother = -1;
 		random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -152,19 +154,21 @@ void cross_over(){
 
 void mutate(){
 	//cout<<"		Mutation begins"<<endl;
-	int size = offsprings.size();
+	double size = offsprings.size();
 	//cout<<"		size of offsprings"<<offsprings.size()<<endl;
-	for(int i=0;i<size*mt;i++){
-		int individual = rand()%size;
+	for(int i=0;i<ceil(size*mt);i++){
+		int individual = rand()%(int)size;
 		int chance = rand()%2;
-		random_device rd;  //Will be used to obtain a seed for the random number engine
-		mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+		random_device r;  //Will be used to obtain a seed for the random number engine
+		mt19937 gen(r()); //Standard mersenne_twister_engine seeded with rd()
 		uniform_int_distribution<> dis(-10000,MAX);
 
-		if(chance == 0)
+		if(chance == 0){
 			offsprings[individual].first = dis(gen);
-		else 
+		}
+		else {
 			offsprings[individual].second = dis(gen);
+		}
 	}
 }
 
